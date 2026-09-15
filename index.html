@@ -705,6 +705,10 @@
   <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYDKofgWYp-ZHmsv_XFzATMOYV62impwETjf7YtyZCjy_n0rVWgT4IShUAD-D_-TAk/exec";
 
+    // Lee el nombre desde la URL, por ejemplo: ?nombre=Carlos
+    const params = new URLSearchParams(window.location.search);
+    const nombreInvitado = (params.get("nombre") || "Sin nombre").trim();
+
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
     const playground = document.getElementById("playground");
@@ -818,7 +822,7 @@
       message.textContent = "💥 ¡BOOM! Guardando tu respuesta...";
       status.textContent = attempts === 0
         ? "¡Sí al primer intento! ❤️"
-        : `Se acabo el tiempo el creeper exploto confirmando la asitencia JAJAJAJA`;
+        : `Confirmado después de ${attempts} intento${attempts === 1 ? "" : "s"} de “No”`;
 
       try {
         await fetch(GOOGLE_SCRIPT_URL, {
@@ -829,7 +833,7 @@
           },
           body: JSON.stringify({
             respuesta: "Sí",
-            nombre: "",
+            nombre: nombreInvitado,
             intentosNo: attempts,
             tiempoSegundos: tiempoSegundos
           })
