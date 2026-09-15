@@ -186,6 +186,7 @@
 
     let scale = 1;
     let attempts = 0;
+    const startTime = Date.now();
 
     const phrases = [
       "¿Seguro? 👀",
@@ -199,6 +200,9 @@
       attempts += 1;
       scale = Math.min(scale + 0.18, 2.35);
 
+      // Al intentar pulsar "No", el botón "Sí" se centra y crece.
+      yesBtn.style.left = "50%";
+      yesBtn.style.top = "50%";
       yesBtn.style.transform = `translate(-50%, -50%) scale(${scale})`;
 
       const area = playground.getBoundingClientRect();
@@ -218,13 +222,40 @@
       message.textContent = phrases[Math.min(attempts - 1, phrases.length - 1)];
     }
 
-    function celebrate() {
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYDKofgWYp-ZHmsv_XFzATMOYV62impwETjf7YtyZCjy_n0rVWgT4IShUAD-D_-TAk/exec";
+
+    async function celebrate() {
       noBtn.style.display = "none";
       yesBtn.style.left = "50%";
       yesBtn.style.top = "50%";
       yesBtn.style.transform = "translate(-50%, -50%) scale(1.35)";
       yesBtn.textContent = "¡Sí, voy! 🎉";
-      message.textContent = "¡Perfecto! Nos vemos en el evento ❤️";
+      yesBtn.disabled = true;
+
+      const tiempoSegundos = Math.round((Date.now() - startTime) / 1000);
+      message.textContent = "Guardando tu respuesta...";
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify({
+            respuesta: "Sí",
+            nombre: "",
+            intentosNo: attempts,
+            tiempoSegundos: tiempoSegundos
+          })
+        });
+
+        message.textContent = "¡Perfecto! Nos vemos en el evento ❤️";
+      } catch (error) {
+        console.error("No se pudo registrar la respuesta:", error);
+        message.textContent = "¡Perfecto! Nos vemos en el evento ❤️";
+      }
+
       message.classList.remove("success");
       void message.offsetWidth;
       message.classList.add("success");
