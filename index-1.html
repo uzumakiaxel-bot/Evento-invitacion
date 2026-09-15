@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f8f5ff" />
+  <title>¿Vienes al evento?</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, #ffe1eb 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #ddd7ff 0%, transparent 35%),
+        linear-gradient(135deg, #fff8fb, #f3f0ff);
+    }
+
+    .card {
+      width: min(100%, 520px);
+      min-height: 460px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 28px;
+      padding: 38px 24px 28px;
+      box-shadow: 0 24px 70px rgba(62, 43, 92, 0.18);
+      backdrop-filter: blur(12px);
+      text-align: center;
+      position: relative;
+    }
+
+    .emoji {
+      font-size: 56px;
+      margin-bottom: 8px;
+      animation: float 2.4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    h1 {
+      margin: 8px 0 10px;
+      font-size: clamp(1.8rem, 7vw, 2.5rem);
+      line-height: 1.05;
+      color: #241a32;
+    }
+
+    .subtitle {
+      margin: 0 auto 26px;
+      color: #6f647c;
+      font-size: 1rem;
+      max-width: 360px;
+      line-height: 1.5;
+    }
+
+    .playground {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      border-radius: 22px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      transition:
+        transform .22s ease,
+        left .22s ease,
+        top .22s ease,
+        box-shadow .22s ease;
+    }
+
+    #yesBtn {
+      position: absolute;
+      left: 25%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      z-index: 2;
+      min-width: 120px;
+      padding: 16px 26px;
+      font-size: 1.18rem;
+      background: linear-gradient(135deg, #32d583, #16b364);
+      color: white;
+    }
+
+    #yesBtn:active {
+      box-shadow: 0 6px 16px rgba(22,179,100,.25);
+    }
+
+    #noBtn {
+      position: absolute;
+      left: 69%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      min-width: 110px;
+      padding: 16px 24px;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, #ff6b7a, #ef476f);
+      color: white;
+    }
+
+    .message {
+      min-height: 32px;
+      margin-top: 8px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #6b4eff;
+    }
+
+    .success {
+      animation: pop .4s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(.92); opacity: .5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .tiny {
+      margin-top: 12px;
+      color: #9a90a5;
+      font-size: .82rem;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+
+      .card {
+        min-height: 430px;
+        padding: 30px 18px 22px;
+        border-radius: 24px;
+      }
+
+      .playground {
+        height: 210px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="emoji">🎉</div>
+    <h1>¿Deseas ir al evento?</h1>
+    <p class="subtitle">Elige con cuidado… parece que una opción tiene más ganas de ganar 😏</p>
+
+    <section class="playground" id="playground" aria-label="Opciones de respuesta">
+      <button id="yesBtn" type="button">Sí 💚</button>
+      <button id="noBtn" type="button">No 😅</button>
+    </section>
+
+    <div class="message" id="message"></div>
+    <div class="tiny">Prometemos no juzgar tu decisión 😌</div>
+  </main>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const playground = document.getElementById("playground");
+    const message = document.getElementById("message");
+
+    let scale = 1;
+    let attempts = 0;
+
+    const phrases = [
+      "¿Seguro? 👀",
+      "Piénsalo bien 😌",
+      "El Sí se ve cada vez mejor…",
+      "Ese No anda muy escurridizo 😂",
+      "Ya casi no queda espacio para decir que no 😏"
+    ];
+
+    function moveNo() {
+      attempts += 1;
+      scale = Math.min(scale + 0.18, 2.35);
+
+      yesBtn.style.transform = `translate(-50%, -50%) scale(${scale})`;
+
+      const area = playground.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+
+      const padding = 12;
+      const maxX = Math.max(padding, area.width - btn.width - padding);
+      const maxY = Math.max(padding, area.height - btn.height - padding);
+
+      const x = padding + Math.random() * (maxX - padding);
+      const y = padding + Math.random() * (maxY - padding);
+
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+      noBtn.style.transform = "none";
+
+      message.textContent = phrases[Math.min(attempts - 1, phrases.length - 1)];
+    }
+
+    function celebrate() {
+      noBtn.style.display = "none";
+      yesBtn.style.left = "50%";
+      yesBtn.style.top = "50%";
+      yesBtn.style.transform = "translate(-50%, -50%) scale(1.35)";
+      yesBtn.textContent = "¡Sí, voy! 🎉";
+      message.textContent = "¡Perfecto! Nos vemos en el evento ❤️";
+      message.classList.remove("success");
+      void message.offsetWidth;
+      message.classList.add("success");
+    }
+
+    noBtn.addEventListener("mouseenter", moveNo);
+
+    noBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      moveNo();
+    });
+
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      moveNo();
+    });
+
+    yesBtn.addEventListener("click", celebrate);
+  </script>
+</body>
+</html>
