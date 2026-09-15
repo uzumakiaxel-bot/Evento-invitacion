@@ -818,7 +818,7 @@
       message.textContent = "💥 ¡BOOM! Guardando tu respuesta...";
       status.textContent = attempts === 0
         ? "¡Sí al primer intento! ❤️"
-        : `Se acabo el tiempo el creeper exploto confirmando la asitencia JAJAJAJA`;
+        : `Confirmado después de ${attempts} intento${attempts === 1 ? "" : "s"} de “No”`;
 
       try {
         await fetch(GOOGLE_SCRIPT_URL, {
